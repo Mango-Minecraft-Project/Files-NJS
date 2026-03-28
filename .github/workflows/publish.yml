@@ -1,0 +1,123 @@
+name: Universal Auto Build and Publish
+
+on:
+  push:
+    branches:
+      - '**'
+
+# 🌟 全域設定：強制使用 Node.js 24 以消除棄用警告
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  prepare-info:
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.vars.outputs.branch }}
+      project_name: ${{ steps.vars.outputs.project_name }}
+      version: ${{ steps.vars.outputs.version }}
+      should_publish: ${{ steps.vars.outputs.should_publish }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract Project Info
+        id: vars
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          
+          P_NAME=$(grep "rootProject.name" settings.gradle | cut -d"'" -f2 | cut -d'"' -f2 || echo "Project")
+          echo "project_name=$P_NAME" >> $GITHUB_OUTPUT
+          
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          REGEX="update ([0-9a-zA-Z.-]+)"
+          
+          if [[ "$COMMIT_MSG" =~ $REGEX ]]; then
+            echo "version=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-artifact:
+    needs: prepare-info
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          # 🌟 如果快取一直報錯且讓你很煩，可以暫時加上這行關閉快取寫入
+          # cache-read-only: false
+          gradle-version: wrapper
+
+      - name: Build Project
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.prepare-info.outputs.project_name }}-${{ needs.prepare-info.outputs.branch }}
+          path: build/libs/*.jar
+          retention-days: 7
+
+  publish-release:
+    needs: [prepare-info, build-and-artifact]
+    if: |
+      needs.prepare-info.outputs.should_publish == 'true' && 
+      needs.prepare-info.outputs.branch == 'main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.prepare-info.outputs.project_name }}-${{ needs.prepare-info.outputs.branch }}
+          path: build/libs/
+
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$PREVIOUS_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"* %s (%h)")
+          else
+            COMMITS=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"* %s (%h)")
+          fi
+          
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "notes<<$EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.prepare-info.outputs.version }}
+          name: "${{ needs.prepare-info.outputs.project_name }} v${{ needs.prepare-info.outputs.version }}"
+          body: |
+            ## 🚀 Automated Release (Main Branch)
+            
+            ### 📝 更新日誌 (Changelog)
+            ${{ steps.changelog.outputs.notes }}
+          files: build/libs/*.jar
