@@ -1,6 +1,7 @@
 # FilesJS - NekoJS File Management Addon Module
 
-FilesJS is a powerful addon for NekoJS 6 designed to handle your file operations with ease. Just kidding—it's not out to steal your Discord account or wallet!
+FilesJS is a powerful addon for NekoJS 6 designed to handle your file operations with ease. Just kidding—it's not out to
+steal your Discord account or wallet!
 
 ## Features
 
@@ -40,6 +41,7 @@ let lastLines = FilesJS.readLastLines('NekoJS/logs/latest.log', 10);
 // Save a script file (auto-adds `.js` extension and timestamp comments)
 FilesJS.saveScript('NekoJS/scripts/newscript', 'console.log("Hello");');
 ```
+
 ### File Management Operations
 
 ```javascript
@@ -137,7 +139,9 @@ let matches = FilesJS.searchInFile('NekoJS/logs/latest.log', 'ERROR');
 ## Security and Limitations
 
 ### Allowed Directories
+
 Accessible files must be within these directories:
+
 - `NekoJS/`
 - `config/`
 - `logs/`
@@ -145,14 +149,18 @@ Accessible files must be within these directories:
 - `scripts/`
 
 ### File Size Limits
+
 - Maximum file size: 5MB
 - Content size for write operations: 5MB
 
 ### File Type Restrictions
+
 Allowed extensions include:
+
 - `.txt`, `.json`, `.js`, `.log`, `.cfg`, `.toml`, `.properties`, `.backup`
 
 ### Safety Measures
+
 - Restricted access to files outside the Minecraft instance directory.
 - No parent directory traversal (`..`).
 - Critical operations automatically create backups.
@@ -200,3 +208,14 @@ This project is licensed under the MIT License. See the LICENSE file for details
 2. Operate only within the allowed directories.
 3. Check file size and type constraints.
 4. Review logs for detailed error information.
+
+---
+
+#### Credits & Licensing
+
+This project is a port of [FilesJS](https://www.curseforge.com/minecraft/mc-mods/kubejs-filesjs)
+by [LirxOwO](https://github.com/xiaoliziawa/) to the NekoJS platform.
+
+* **Original Project:** [xiaoliziawa/Files-JS](https://github.com/xiaoliziawa/Files-JS)
+* **License:** The original code is licensed under
+  the [MIT License](https://github.com/xiaoliziawa/Files-JS/blob/main/LICENSE).
