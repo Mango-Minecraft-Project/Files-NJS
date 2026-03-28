@@ -1,0 +1,13 @@
+{
+  "itemGroup.nekojsaddonexample": "Example Mod Tab",
+  "block.nekojsaddonexample.example_block": "Example Block",
+  "item.nekojsaddonexample.example_item": "Example Item",
+
+  "nekojsaddonexample.configuration.title": "NekoJS Addon Example Configs",
+  "nekojsaddonexample.configuration.section.nekojsaddonexample.common.toml": "NekoJS Addon Example Configs",
+  "nekojsaddonexample.configuration.section.nekojsaddonexample.common.toml.title": "NekoJS Addon Example Configs",
+  "nekojsaddonexample.configuration.items": "Item List",
+  "nekojsaddonexample.configuration.logDirtBlock": "Log Dirt Block",
+  "nekojsaddonexample.configuration.magicNumberIntroduction": "Magic Number Text",
+  "nekojsaddonexample.configuration.magicNumber": "Magic Number"
+}
