@@ -5,7 +5,6 @@ on:
     branches:
       - '**'
 
-# 🌟 全域設定：強制使用 Node.js 24 以消除棄用警告
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -24,12 +23,16 @@ jobs:
       - name: Extract Project Info
         id: vars
         run: |
+          # 1. 獲取分支
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
           
-          P_NAME=$(grep "rootProject.name" settings.gradle | cut -d"'" -f2 | cut -d'"' -f2 || echo "Project")
+          # 2. 強化的專案名稱抓取 (支援單引號、雙引號、有無空格)
+          # 邏輯：找包含 rootProject.name 的行，提取引號內的內容
+          P_NAME=$(grep "rootProject.name" settings.gradle | sed -E "s/.*['\"](.*)['\"].*/\1/" || echo "Project")
           echo "project_name=$P_NAME" >> $GITHUB_OUTPUT
           
+          # 3. 偵測版本號
           COMMIT_MSG="${{ github.event.head_commit.message }}"
           REGEX="update ([0-9a-zA-Z.-]+)"
           
@@ -57,10 +60,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-        with:
-          # 🌟 如果快取一直報錯且讓你很煩，可以暫時加上這行關閉快取寫入
-          # cache-read-only: false
-          gradle-version: wrapper
 
       - name: Build Project
         run: |
@@ -75,7 +74,7 @@ jobs:
           retention-days: 7
 
   publish-release:
-    needs: [prepare-info, build-and-artifact]
+    needs: [ prepare-info, build-and-artifact ]
     if: |
       needs.prepare-info.outputs.should_publish == 'true' && 
       needs.prepare-info.outputs.branch == 'main'
@@ -114,6 +113,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.prepare-info.outputs.version }}
+          # 🌟 這裡做了最終修正
           name: "${{ needs.prepare-info.outputs.project_name }} v${{ needs.prepare-info.outputs.version }}"
           body: |
             ## 🚀 Automated Release (Main Branch)
