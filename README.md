@@ -2,6 +2,8 @@
 
 FilesNJS is an extension ported from KubeJS's FilesJS, specifically designed for the NekoJS mod.
 
+See the [Usage Document](https://nekojs.ytmango.uk/zh-tw/addons/FilesNJS/) for example usages.
+
 ---
 
 #### Credits & Licensing
