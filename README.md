@@ -1,6 +1,6 @@
 # FilesNJS - NekoJS File Management Addon Module
 
-FilesNJS is an extension ported from KubeJS's FilesJS, specifically designed for the NekoJS module.
+FilesNJS is an extension ported from KubeJS's FilesJS, specifically designed for the NekoJS mod.
 
 ---
 
