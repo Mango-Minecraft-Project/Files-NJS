@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class FilesNJSPlugin implements NekoJSPlugin {
     @Override
     public void registerBindings(BindingsRegister registry) {
-        registry.register(Binding.of("FilesNJS", new FilesWrapper()));
+        registry.register(Binding.of("FilesJS", new FilesWrapper()));
     }
 
     @Override

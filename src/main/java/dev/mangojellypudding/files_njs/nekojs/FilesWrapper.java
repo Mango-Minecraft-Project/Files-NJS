@@ -389,7 +389,7 @@ public class FilesWrapper {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
             String backupName = sourcePath.getFileName().toString() + "." + timestamp + ".backup";
 
-            Path backupDir = Paths.get("kubejs/backups");
+            Path backupDir = Paths.get("nekojs/backups");
             Path backupPath = backupDir.resolve(backupName);
             validateAndNormalizePath(backupPath.toString());
 
@@ -761,7 +761,7 @@ public class FilesWrapper {
     private void doBackup(String path) {
         try {
             Path sourcePath = validateAndNormalizePath(path);
-            Path backupDir = Paths.get("kubejs/backups");
+            Path backupDir = Paths.get("nekojs/backups");
             Files.createDirectories(backupDir);
 
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
